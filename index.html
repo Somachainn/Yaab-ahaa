@@ -3,438 +3,372 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Laam DEX</title>
+<title>Laam DEX Wallet</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/10.4.0/stellar-sdk.min.js"></script>
-<!-- Library for encryption -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 <style>
   :root{
-    --bg1:#1a2a6c; --bg2:#b21f1f; --bg3:#fdbb2d;
-    --card:rgba(0, 0, 0, 0.2); --card2:rgba(0, 0, 0, 0.3);
-    --text:#f0f4f8; --muted:#a0b0c0;
-    --brand:#ffc300; --brand2:#ffd60a; --line:rgba(255, 255, 255, 0.2);
-    --ok:#28a745; --warn:#ffc107; --err:#dc3545;
-    --maxw: 920px; --rad:14px;
+    --teal:#0e8691; --teal2:#0b6f78;
+    --bg:#f4f7fb; --card:#ffffff; --line:#e3e8ef;
+    --text:#0a1f33; --muted:#6b7a8a; --ok:#28a745; --err:#dc3545;
+    --brand:#0052cc;
+    --rad:16px; --shadow:0 10px 28px rgba(15,23,42,.10);
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
-    color:var(--text);
-    background: linear-gradient(135deg, var(--bg1), var(--bg2), var(--bg3));
-    min-height:100vh; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px;
-  }
-  .app{ width:100%; max-width:var(--maxw); text-align:center; }
-  h1{
-    margin:0 0 18px 0; font-size:2.2rem; font-weight:800; color:var(--brand);
-    text-shadow:0 0 12px rgba(255,195,0,.7);
-  }
-  .card{
-    background: var(--card);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius: var(--rad);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    padding:18px;
-    margin:14px auto;
-  }
-  .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-  @media (max-width:820px){ .grid-2{ grid-template-columns:1fr; } }
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:920px;margin:0 auto;padding:14px}
+  .hidden{display:none}
 
-  label{ display:block; text-align:left; margin:6px 0 6px; font-weight:600; color:var(--brand); }
-  input, select, button{
-    width:100%; padding:12px 14px; border:none; border-radius:12px; font-size:1rem;
-    background: rgba(0,0,0,0.25); color:var(--text); outline:none;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,.3);
+  /* ===== TOP PORTFOLIO BAR ===== */
+  .portfolio{
+    background:var(--teal); color:#fff; border-radius:24px;
+    padding:26px 18px 18px; box-shadow:var(--shadow);
   }
-  button{
-    background: var(--brand); color:#111; font-weight:800; letter-spacing:.02em;
-    box-shadow: 0 8px 18px rgba(255,195,0,.4); cursor:pointer; text-transform:uppercase;
-    transition: all .2s ease;
-  }
-  button:hover{ background:var(--brand2); box-shadow:0 12px 28px rgba(255,214,10,.6); transform: translateY(-2px); }
-  button:disabled{ background:#8a8a8a; cursor:not-allowed; box-shadow:none; transform: none; }
-  .btn-danger { background: var(--err); color: white; }
-  .btn-danger:hover { background: #c82333; }
+  .port-head{ display:flex; justify-content:space-between; align-items:center; opacity:.92; font-weight:600; }
+  .port-main{ text-align:center; margin:10px 0 6px; }
+  .port-value{ font-size:3rem; font-weight:900; letter-spacing:.5px; }
+  .port-delta{ display:flex; gap:8px; justify-content:center; margin-top:6px; }
+  .chip{ background:rgba(255,255,255,.14); padding:6px 10px; border-radius:999px; font-weight:700; }
+  .eye{ cursor:pointer; user-select:none; }
 
-  .mono{
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-    background:rgba(0,0,0,0.3); padding:10px 12px; border-radius:12px;
-    overflow-wrap:anywhere; word-break:break-word;
-  }
-  #status{
-    min-height:28px; font-weight:700; color:var(--brand); text-shadow:0 0 8px var(--brand);
-  }
-  .muted{ color:var(--muted); font-size:.92rem; }
-  .balances{
-    display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
-  }
-  .pill{
-    background:var(--card2); border:1px solid rgba(255,255,255,.1);
-    padding:8px 12px; border-radius:999px; font-weight:700;
-  }
-  /* Hide/show sections */
-  .hidden { display: none; }
+  /* ===== ACTION BUTTONS ===== */
+  .actions{ display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
+  @media (max-width:720px){ .actions{ grid-template-columns:repeat(2,1fr);} }
+  .act{ background:var(--card); border:1px solid var(--line); border-radius:18px; padding:12px 10px; text-align:center; box-shadow:var(--shadow); }
+  .act-circle{ width:64px;height:64px;border-radius:50%;margin:0 auto 8px; display:grid;place-items:center; background:#eaf0f6; border:1px solid var(--line); font-size:26px; }
+  .act label{ display:block; font-weight:800; margin-top:2px; }
+  .act small{ color:var(--muted) }
+
+  /* ===== CARD ===== */
+  .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--rad); box-shadow:var(--shadow); padding:16px; margin-top:14px; }
+
+  /* ===== MY ASSETS ===== */
+  .assets h3{ margin:6px 0 10px; }
+  .asset-row{ display:flex; align-items:center; justify-content:space-between; padding:12px 8px; border-bottom:1px dashed var(--line); }
+  .asset-left{ display:flex; align-items:center; gap:12px; }
+  .icon{ width:42px;height:42px;border-radius:50%; background:#eef2f6; display:grid; place-items:center; font-size:22px; }
+  .aname{ font-weight:800; }
+  .aissuer{ font-size:.9rem; color:var(--muted); }
+  .aval{ text-align:right; }
+  .aval .amt{ font-weight:800; }
+  .aval .usd{ color:var(--muted); font-size:.9rem; }
+
+  /* ===== Misc ===== */
+  .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace }
+  input,button,select{font-size:1rem}
+  button{cursor:pointer}
+  .btn{ padding:12px 14px; border-radius:12px; border:1px solid var(--line); background:#f5f7fb; }
+  .btn.primary{ background:#0ea5e9; color:#fff; border:none }
 </style>
 </head>
 <body>
-  <div class="app">
-    <h1>Laam DEX</h1>
+<div class="wrap">
 
-    <!-- LOGIN / WALLET SECTION -->
-    <div id="walletSection" class="card">
-      <!-- Unlock Wallet View -->
-      <div id="unlockView">
-        <h3 style="margin:0 0 10px 0; color:var(--brand)">Unlock Your Wallet</h3>
-        <label for="walletPassword">Password</label>
-        <input id="walletPassword" type="password" placeholder="Enter your password" />
-        <button id="unlockBtn" style="margin-top:10px;">Unlock</button>
-        <p class="muted" style="margin-top:10px;">
-          Forgot password? <a href="#" id="resetWalletLink">Reset and import new key</a>.
-        </p>
-      </div>
-
-      <!-- Import Key View -->
-      <div id="importView" class="hidden">
-        <h3 style="margin:0 0 10px 0; color:var(--brand)">Import Account</h3>
-        <label for="secretKey">Your Secret Key</label>
-        <input id="secretKey" type="password" placeholder="Starts with S... Keep it safe!" />
-        <label for="createPassword" style="margin-top:8px;">Create a Password</label>
-        <input id="createPassword" type="password" placeholder="Min. 8 characters" />
-        <div class="muted" style="font-size:0.8rem; margin-top:4px;">This password encrypts your key in this browser. We don't store it.</div>
-        <button id="importBtn" style="margin-top:10px;">Import and Save</button>
-      </div>
-    </div>
-
-    <!-- LOGGED IN USER INFO -->
-    <div id="loggedInView" class="hidden">
-      <div class="card">
-        <div class="balances">
-          <span class="pill">XLM: <span id="xlmBal">0.00</span></span>
-          <span class="pill">Laam: <span id="laamBal">0.00</span></span>
-        </div>
-        <label style="margin-top:10px;">Your Public Key</label>
-        <div id="pubKey" class="mono">-</div>
-        <div style="display:flex; gap:10px; margin-top:10px; justify-content:center;">
-            <button id="addTrustlineBtn">Add Laam Trustline</button>
-            <button id="logoutBtn" class="btn-danger">Logout & Lock</button>
-        </div>
-      </div>
-
-      <!-- TRADE PANELS -->
-      <div class="card trade-panels grid-2">
-        <!-- Buy Panel -->
-        <div class="panel buy">
-          <h3>Laam (Pay XLM)</h3>
-          <label>Price (XLM per Laam)</label>
-          <input id="buyPrice" type="number" step="0.0000001" placeholder="e.g. 0.135" />
-          <label style="margin-top:8px;">Amount (Laam)</label>
-          <input id="buyAmount" type="number" step="0.0000001" placeholder="e.g. 100" />
-          <button id="btnPlaceBuy" style="margin-top:10px;">Place Buy Offer</button>
-        </div>
-        <!-- Sell Panel -->
-        <div class="panel sell">
-          <h3>Laam (Get XLM)</h3>
-          <label>Price (XLM per Laam)</label>
-          <input id="sellPrice" type="number" step="0.0000001" placeholder="e.g. 0.135" />
-          <label style="margin-top:8px;">Amount (Laam)</label>
-          <input id="sellAmount" type="number" step="0.0000001" placeholder="e.g. 100" />
-          <button id="btnPlaceSell" style="margin-top:10px;">Place Sell Offer</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ORDERBOOK -->
+  <!-- AUTH PANELS (iscisiya sidii hore) -->
+  <div id="authSection">
     <div class="card">
-      <h3 style="margin:0 0 10px 0; color:var(--brand)">Market Offers</h3>
-      <div id="status" style="margin-bottom:10px;">Loading market...</div>
-      <div class="grid-2">
-        <div>
-          <h4 style="margin:0 0 8px 0; color:var(--ok);">Buy Offers (Bids)</h4>
-          <table>
-            <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-            <tbody id="bidsBody"></tbody>
-          </table>
+      <div id="initialView">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div>
+            <h3 style="margin:0;color:var(--brand)">New User?</h3>
+            <button id="showCreateWalletBtn" class="btn">Create New Wallet</button>
+            <div id="createWalletForm" class="hidden" style="margin-top:10px;">
+              <button id="generateAccountBtn" class="btn">Generate New Stellar Account</button>
+              <label style="display:block;margin-top:10px;">New Secret Key</label>
+              <div id="newSecret" class="mono">-</div>
+              <label style="display:block;margin-top:10px;">New Public Key</label>
+              <div id="newPublic" class="mono">-</div>
+              <div style="color:var(--muted);margin-top:6px;">Save your secret key securely; fund ≥ 2 XLM to activate.</div>
+            </div>
+          </div>
+          <div>
+            <h3 style="margin:0;color:var(--brand)">Have a Wallet?</h3>
+            <label>Secret Key</label>
+            <input id="secretKeyInput" type="password" placeholder="S..." style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px" />
+            <label style="display:block;margin-top:10px;">Create Password</label>
+            <input id="savePasswordInput" type="password" placeholder="Min 8 chars" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px" />
+            <button id="importAndSaveBtn" class="btn primary" style="margin-top:10px;">Import and Save</button>
+          </div>
         </div>
-        <div>
-          <h4 style="margin:0 0 8px 0; color:var(--err);">Sell Offers (Asks)</h4>
-          <table>
-            <thead><tr><th>Price (XLM/Laam)</th><th>Amount (Laam)</th><th>Total (XLM)</th></tr></thead>
-            <tbody id="asksBody"></tbody>
-          </table>
-        </div>
+      </div>
+
+      <div id="unlockView" class="hidden">
+        <h3 style="margin:0;color:var(--brand)">Unlock Wallet</h3>
+        <label>Password</label>
+        <input id="walletPassword" type="password" placeholder="••••••••" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px" />
+        <button id="unlockBtn" class="btn primary" style="margin-top:10px;">Unlock</button>
+        <p style="margin:8px 0 0;"><a href="#" id="resetWalletLink">Reset and Import New Key</a></p>
       </div>
     </div>
   </div>
 
+  <!-- LOGGED IN VIEW -->
+  <div id="loggedInView" class="hidden">
+    <!-- TOP: Portfolio -->
+    <div class="portfolio">
+      <div class="port-head">
+        <span>Estimated portfolio value</span>
+        <span class="eye" id="eyeToggle">👁️</span>
+      </div>
+      <div class="port-main">
+        <div class="port-value" id="portUsd">$0.00</div>
+        <div class="port-delta">
+          <span class="chip" id="portDeltaAmt">-$0.00</span>
+          <span class="chip" id="portDeltaPct">▼ 0.00%</span>
+        </div>
+      </div>
+
+      <!-- MIDDLE: buttons -->
+      <div class="actions">
+        <div class="act">
+          <div class="act-circle">↗</div>
+          <button class="btn primary" id="btnSendToggle" style="width:100%">Send</button>
+          <small></small>
+        </div>
+        <div class="act">
+          <div class="act-circle">↘</div>
+          <button class="btn" id="btnReceive" style="width:100%">Receive</button>
+        </div>
+        <div class="act">
+          <div class="act-circle">＋</div>
+          <button class="btn" id="addTrustlineBtn" style="width:100%">Add Laam Trustline</button>
+        </div>
+        <div class="act">
+          <div class="act-circle">🔒</div>
+          <button class="btn" id="logoutBtn" style="width:100%">Lock Wallet</button>
+        </div>
+      </div>
+
+      <!-- Send collapse -->
+      <div id="sendForm" class="card" style="margin-top:14px;display:none;background:#0f94a0;border-color:#138996;color:#fff">
+        <h4 style="margin:0 0 8px">Send Assets</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div>
+            <label>Asset</label>
+            <select id="sendAsset" style="width:100%;padding:10px;border-radius:10px">
+              <option value="XLM">XLM</option>
+              <option value="LAAM">Laam</option>
+            </select>
+          </div>
+          <div>
+            <label>Amount</label>
+            <input id="sendAmount" type="number" step="0.0000001" placeholder="e.g. 10" style="width:100%;padding:10px;border-radius:10px" />
+          </div>
+        </div>
+        <label style="display:block;margin-top:8px;">Destination (G…)</label>
+        <input id="sendDest" type="text" style="width:100%;padding:10px;border-radius:10px" />
+        <button id="btnSend" class="btn" style="margin-top:10px;background:#fff;">Send Now</button>
+      </div>
+    </div>
+
+    <!-- BOTTOM: My assets -->
+    <div class="card assets">
+      <h3>My assets</h3>
+
+      <div class="asset-row">
+        <div class="asset-left">
+          <div class="icon">Ⓢ</div>
+          <div>
+            <div class="aname">Lumens</div>
+            <div class="aissuer">XLM (stellar.org)</div>
+          </div>
+        </div>
+        <div class="aval">
+          <div class="amt"><span id="xlmBal">0.00</span> XLM</div>
+          <div class="usd">$<span id="xlmUsd">0.00</span></div>
+        </div>
+      </div>
+
+      <div class="asset-row">
+        <div class="asset-left">
+          <div class="icon">△</div>
+          <div>
+            <div class="aname">Laam</div>
+            <div class="aissuer">Laam (laam.online)</div>
+          </div>
+        </div>
+        <div class="aval">
+          <div class="amt"><span id="laamBal">0.00</span> Laam</div>
+          <div class="usd">$<span id="laamUsd">0.00</span></div>
+        </div>
+      </div>
+
+      <label style="display:block;margin-top:12px;">Your Public Key</label>
+      <div id="pubKey" class="mono" style="overflow-wrap:anywhere;background:#f1f5f9;border:1px solid var(--line);padding:10px;border-radius:10px">-</div>
+    </div>
+  </div>
+
+  <!-- Receive Modal -->
+  <div id="receiveModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.5);display:grid;place-items:center;z-index:10;">
+    <div class="card" style="max-width:420px;width:92%;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="margin:0">Receive</h3>
+        <button class="btn" onclick="toggleReceive(false)">✕</button>
+      </div>
+      <div class="mono" id="recvAddress" style="margin:10px 0">-</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="copyAddr" class="btn">Copy</button>
+        <a id="qrLink" target="_blank" rel="noopener" class="btn">Open QR</a>
+      </div>
+      <img id="qrImg" alt="QR" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--line);margin-top:8px" />
+    </div>
+  </div>
+
+</div>
+
 <script>
-// === Stellar & UI Setup ===
+/* ========= Stellar / App State ========= */
 const server = new StellarSdk.Server('https://horizon.stellar.org');
 const ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
-const LAAM  = new StellarSdk.Asset('Laam', ISSUER);
-const XLM   = StellarSdk.Asset.native();
+const ASSET_LAAM = new StellarSdk.Asset('Laam', ISSUER);
+const ASSET_XLM  = StellarSdk.Asset.native();
+const KEY_SLOT = 'laam_dex_wallet_v4';
+let keypair=null, account=null, asks=[], bids=[], hideValues=false;
 
-// --- Global State ---
-let keypair = null;
-let account = null;
-let balTimer = null;
+/* ========= Helpers ========= */
+const $ = sel => document.querySelector(sel);
+function walletExists(){ return !!localStorage.getItem(KEY_SLOT); }
+function encrypt(sk,pw){ return CryptoJS.AES.encrypt(sk,pw).toString(); }
+function decrypt(ct,pw){ return CryptoJS.AES.decrypt(ct,pw).toString(CryptoJS.enc.Utf8); }
 
-// --- UI Elements ---
-const walletSection = document.getElementById('walletSection');
-const unlockView = document.getElementById('unlockView');
-const importView = document.getElementById('importView');
-const loggedInView = document.getElementById('loggedInView');
-const statusEl = document.getElementById('status');
-
-// === Wallet & Encryption Logic ===
-const ENCRYPTED_KEY_NAME = 'laam_dex_wallet';
-
-// Encrypts a secret key with a password
-function encryptKey(secretKey, password) {
-  return CryptoJS.AES.encrypt(secretKey, password).toString();
-}
-
-// Decrypts a secret key with a password
-function decryptKey(encryptedKey, password) {
-  const bytes = CryptoJS.AES.decrypt(encryptedKey, password);
-  return bytes.toString(CryptoJS.enc.Utf8);
-}
-
-// Check if a wallet exists in localStorage
-function walletExists() {
-  return !!localStorage.getItem(ENCRYPTED_KEY_NAME);
-}
-
-// --- UI Switching ---
-function showView(view) {
-  walletSection.style.display = 'block';
-  loggedInView.style.display = 'none';
-  unlockView.style.display = 'none';
-  importView.style.display = 'none';
-
-  if (view === 'unlock') unlockView.style.display = 'block';
-  else if (view === 'import') importView.style.display = 'block';
-  else if (view === 'loggedIn') {
-    walletSection.style.display = 'none';
-    loggedInView.style.display = 'block';
+/* ========= Auth ========= */
+async function login(secret){
+  try{
+    keypair = StellarSdk.Keypair.fromSecret(secret);
+    account = await server.loadAccount(keypair.publicKey());
+    $('#pubKey').textContent = keypair.publicKey();
+    $('#authSection').classList.add('hidden');
+    $('#loggedInView').classList.remove('hidden');
+    await Promise.all([loadOrderbook(), refreshBalances()]);
+  }catch(e){
+    alert(e.message.includes('404')?'Account not found. Fund ≥ 2 XLM.':'Could not load account.');
+    $('#authSection').classList.remove('hidden');
+    $('#loggedInView').classList.add('hidden');
   }
 }
-
-// === Core App Functions ===
-function setStatus(msg, type = 'ok') {
-    statusEl.textContent = msg;
-    if (type === 'err') statusEl.style.color = 'var(--err)';
-    else if (type === 'warn') statusEl.style.color = 'var(--warn)';
-    else statusEl.style.color = 'var(--brand)';
+function logout(){
+  keypair=null; account=null;
+  $('#loggedInView').classList.add('hidden');
+  $('#authSection').classList.remove('hidden');
 }
 
-async function login(secret) {
-    try {
-        keypair = StellarSdk.Keypair.fromSecret(secret);
-        account = await server.loadAccount(keypair.publicKey());
-        
-        document.getElementById('pubKey').textContent = keypair.publicKey();
-        setStatus('Account loaded successfully.', 'ok');
-        showView('loggedIn');
-        
-        await refreshBalances();
-        if (balTimer) clearInterval(balTimer);
-        balTimer = setInterval(refreshBalances, 10000);
-    } catch (e) {
-        keypair = null;
-        account = null;
-        setStatus('Error: Could not load account. Check your key.', 'err');
-        showView(walletExists() ? 'unlock' : 'import');
-    }
+/* ========= Prices & Portfolio ========= */
+async function fetchXlmUsd(){
+  try{
+    const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids=stellar&vs_currencies=usd');
+    const d=await r.json(); return d.stellar.usd;
+  }catch{ return 0; }
 }
-
-function logout() {
-    keypair = null;
-    account = null;
-    if (balTimer) clearInterval(balTimer);
-    document.getElementById('walletPassword').value = '';
-    showView(walletExists() ? 'unlock' : 'import');
-    setStatus('You have been logged out.');
-}
-
-async function refreshBalances() {
-    if (!keypair) return;
-    try {
-        account = await server.loadAccount(keypair.publicKey());
-        let xlm = 0, laam = 0;
-        for (const b of account.balances) {
-            if (b.asset_type === 'native') xlm = parseFloat(b.balance);
-            if (b.asset_code === 'Laam' && b.asset_issuer === ISSUER) laam = parseFloat(b.balance);
-        }
-        document.getElementById('xlmBal').textContent = xlm.toFixed(2);
-        document.getElementById('laamBal').textContent = laam.toFixed(2);
-    } catch (e) {
-        console.error('Balance refresh failed:', e);
-        setStatus('Could not refresh balances.', 'warn');
-    }
-}
-
-// === Event Listeners ===
-
-// --- Wallet Listeners ---
-document.getElementById('importBtn').addEventListener('click', () => {
-    const secret = document.getElementById('secretKey').value.trim();
-    const password = document.getElementById('createPassword').value;
-
-    if (password.length < 8) {
-        alert('Password must be at least 8 characters long.');
-        return;
-    }
-    if (!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) {
-        alert('Invalid Secret Key.');
-        return;
-    }
-
-    const encryptedKey = encryptKey(secret, password);
-    localStorage.setItem(ENCRYPTED_KEY_NAME, encryptedKey);
-    
-    document.getElementById('secretKey').value = '';
-    document.getElementById('createPassword').value = '';
-    
-    login(secret);
-});
-
-document.getElementById('unlockBtn').addEventListener('click', () => {
-    const password = document.getElementById('walletPassword').value;
-    const encryptedKey = localStorage.getItem(ENCRYPTED_KEY_NAME);
-
-    if (!password) {
-        alert('Please enter your password.');
-        return;
-    }
-
-    try {
-        const secret = decryptKey(encryptedKey, password);
-        if (!StellarSdk.StrKey.isValidEd25519SecretSeed(secret)) {
-            throw new Error('Decryption failed or key is invalid');
-        }
-        login(secret);
-    } catch (e) {
-        setStatus('Wrong password or corrupted data.', 'err');
-    }
-});
-
-document.getElementById('logoutBtn').addEventListener('click', logout);
-
-document.getElementById('resetWalletLink').addEventListener('click', (e) => {
-    e.preventDefault();
-    if (confirm('Are you sure? This will remove your saved key from this browser. You will need your secret key to import it again.')) {
-        localStorage.removeItem(ENCRYPTED_KEY_NAME);
-        logout();
-        showView('import');
-        setStatus('Wallet reset. Please import your key.');
-    }
-});
-
-// --- Trading and other listeners ---
-document.getElementById('addTrustlineBtn').addEventListener('click', async () => {
-    // (This function is the same as before, just ensure it uses the global `keypair` and `account` variables)
-    if (!account || !keypair){ alert('Load your account first.'); return; }
-    try{
-      const exists = account.balances.some(b=> b.asset_code==='Laam' && b.asset_issuer===ISSUER);
-      if (exists){ setStatus('Trustline already exists.'); return; }
-
-      const fee = await server.fetchBaseFee();
-      const tx = new StellarSdk.TransactionBuilder(account, {fee, networkPassphrase: StellarSdk.Networks.PUBLIC})
-        .addOperation(StellarSdk.Operation.changeTrust({ asset: LAAM, limit: '1000000000' }))
-        .setTimeout(30)
-        .build();
-      tx.sign(keypair);
-      const res = await server.submitTransaction(tx);
-      setStatus('Trustline added. Tx: '+res.hash);
-      await refreshBalances();
-    }catch(e){ setStatus('Error (trustline): '+ (e?.message || e), 'err'); }
-});
-
-async function placeOffer(isBuy) {
-    if (!account || !keypair) { alert('Please log in first.'); return; }
-    const price = parseFloat(document.getElementById(isBuy ? 'buyPrice' : 'sellPrice').value);
-    const amount = parseFloat(document.getElementById(isBuy ? 'buyAmount' : 'sellAmount').value);
-
-    if (!(price > 0) || !(amount > 0)) { alert('Enter a valid price and amount.'); return; }
-
-    try {
-        const freshAccount = await server.loadAccount(keypair.publicKey());
-        const fee = await server.fetchBaseFee();
-        let operation;
-
-        if (isBuy) { // Buy Laam, Sell XLM
-            operation = StellarSdk.Operation.manageBuyOffer({
-                selling: XLM,
-                buying: LAAM,
-                buyAmount: amount.toFixed(7),
-                price: price.toString(), // Price of 1 unit of buying in terms of selling
-            });
-        } else { // Sell Laam, Buy XLM
-            operation = StellarSdk.Operation.manageSellOffer({
-                selling: LAAM,
-                buying: XLM,
-                amount: amount.toFixed(7),
-                price: price.toString(), // Price of 1 unit of selling in terms of buying
-            });
-        }
-
-        const tx = new StellarSdk.TransactionBuilder(freshAccount, { fee, networkPassphrase: StellarSdk.Networks.PUBLIC })
-            .addOperation(operation)
-            .setTimeout(30)
-            .build();
-        
-        tx.sign(keypair);
-        const res = await server.submitTransaction(tx);
-        setStatus(`${isBuy ? 'Buy' : 'Sell'} offer placed successfully.`, 'ok');
-        await refreshBalances();
-        await loadOrderbook();
-    } catch (e) {
-        setStatus(`Error placing ${isBuy ? 'buy' : 'sell'} offer: ` + (e?.message || e), 'err');
-    }
-}
-
-document.getElementById('btnPlaceBuy').addEventListener('click', () => placeOffer(true));
-document.getElementById('btnPlaceSell').addEventListener('click', () => placeOffer(false));
-
-
-// === Orderbook Display ===
-function fmt(n, d=7){ const x = parseFloat(n); if(!isFinite(x)) return '-'; return x.toFixed(d); }
-
 async function loadOrderbook(){
-    try{
-      const ob = await server.orderbook(LAAM, XLM).call();
-      
-      function rowHTML(price, amount){
-        const total = price * amount;
-        return `<tr><td>${fmt(price)}</td><td>${fmt(amount)}</td><td>${fmt(total)}</td></tr>`;
-      }
+  try{
+    const ob = await server.orderbook(ASSET_LAAM, ASSET_XLM).call();
+    asks=ob.asks; bids=ob.bids;
+  }catch(e){ asks=bids=[]; }
+}
+function laamPriceXLM(){
+  if(asks.length) return parseFloat(asks[0].price);
+  if(bids.length) return 1/parseFloat(bids[0].price);
+  return 0;
+}
+async function refreshBalances(){
+  if(!keypair) return;
+  account=await server.loadAccount(keypair.publicKey());
+  let xlm=0, laam=0;
+  for(const b of account.balances){
+    if(b.asset_type==='native') xlm=parseFloat(b.balance);
+    if(b.asset_code==='Laam' && b.asset_issuer===ISSUER) laam=parseFloat(b.balance);
+  }
+  const xlmUsd = await fetchXlmUsd();
+  const laamPx = laamPriceXLM();
+  const laamUsd = laamPx * xlmUsd;
 
-      bidsBody.innerHTML = ob.bids.length
-        ? ob.bids.map(b => rowHTML(parseFloat(b.price), parseFloat(b.amount))).join('')
-        : `<tr><td colspan="3" class="muted">No buy offers</td></tr>`;
+  // set asset rows
+  $('#xlmBal').textContent=xlm.toFixed(2);
+  $('#laamBal').textContent=laam.toFixed(2);
+  $('#xlmUsd').textContent=(xlm*xlmUsd).toFixed(2);
+  $('#laamUsd').textContent=(laam*laamUsd).toFixed(2);
 
-      asksBody.innerHTML = ob.asks.length
-        ? ob.asks.map(a => rowHTML(parseFloat(a.price), parseFloat(a.amount))).join('')
-        : `<tr><td colspan="3" class="muted">No sell offers</td></tr>`;
-        
-      setStatus('Market data loaded.', 'ok');
-    }catch(e){
-      console.error(e);
-      setStatus('Error loading orderbook.', 'err');
-    }
+  // portfolio (simple delta mock vs 24h -0.4%)
+  const totalUsd = (xlm*xlmUsd) + (laam*laamUsd);
+  const deltaPct = -0.40; // demo – haddii aad rabto waan ka dhigi karnaa real, hadda waa style la mid ah sawirka
+  const deltaAmt = totalUsd * (deltaPct/100);
+  $('#portUsd').textContent = hideValues ? '•••' : ('$'+totalUsd.toFixed(2));
+  $('#portDeltaAmt').textContent = (deltaAmt<0?'-':'+')+'$'+Math.abs(deltaAmt).toFixed(2);
+  $('#portDeltaPct').textContent = (deltaPct<0?'▼ ':'▲ ')+Math.abs(deltaPct).toFixed(2)+'%';
 }
 
-// === Initial Load ===
-document.addEventListener('DOMContentLoaded', () => {
-    if (walletExists()) {
-        showView('unlock');
-    } else {
-        showView('import');
-    }
-    loadOrderbook(); // Load market data regardless of login state
-});
+/* ========= Receive modal ========= */
+function toggleReceive(show=true){
+  const m = $('#receiveModal');
+  if(show){
+    const addr = keypair?.publicKey() || $('#pubKey').textContent;
+    $('#recvAddress').textContent = addr;
+    const url=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(addr)}`;
+    $('#qrImg').src=url; $('#qrLink').href=url;
+    m.classList.remove('hidden');
+  }else m.classList.add('hidden');
+}
 
+/* ========= Events ========= */
+$('#showCreateWalletBtn').onclick=()=>{ document.getElementById('createWalletForm').classList.remove('hidden'); $('#showCreateWalletBtn').classList.add('hidden'); };
+$('#generateAccountBtn').onclick=()=>{ const p=StellarSdk.Keypair.random(); $('#newSecret').textContent=p.secret(); $('#newPublic').textContent=p.publicKey(); };
+$('#importAndSaveBtn').onclick=async ()=>{
+  const sk=$('#secretKeyInput').value.trim(), pw=$('#savePasswordInput').value;
+  if(!sk||!pw) return alert('Enter secret & password'); if(pw.length<8) return alert('Password too short');
+  try{ StellarSdk.Keypair.fromSecret(sk); localStorage.setItem(KEY_SLOT, encrypt(sk,pw)); await login(sk); }catch{ alert('Invalid secret'); }
+};
+$('#unlockBtn').onclick=async ()=>{
+  const enc=localStorage.getItem(KEY_SLOT), pw=$('#walletPassword').value;
+  try{ const sk=decrypt(enc,pw); await login(sk); }catch{ alert('Wrong password'); }
+};
+$('#resetWalletLink').onclick=(e)=>{ e.preventDefault(); if(confirm('Delete saved wallet?')){ localStorage.removeItem(KEY_SLOT); location.reload(); }};
+
+$('#btnSendToggle').onclick=()=>{ const s=document.getElementById('sendForm'); s.style.display = s.style.display==='none'||!s.style.display ? 'block':'none'; };
+$('#btnReceive').onclick=()=>toggleReceive(true);
+$('#copyAddr').onclick=async ()=>{ await navigator.clipboard.writeText($('#recvAddress').textContent); alert('Copied'); };
+$('#logoutBtn').onclick=logout;
+$('#addTrustlineBtn').onclick=async ()=>{
+  if(!keypair||!account) return alert('Login first');
+  try{
+    const tx=new StellarSdk.TransactionBuilder(account,{fee:StellarSdk.BASE_FEE,networkPassphrase:StellarSdk.Networks.PUBLIC})
+      .addOperation(StellarSdk.Operation.changeTrust({asset:ASSET_LAAM}))
+      .setTimeout(30).build();
+    tx.sign(keypair); await server.submitTransaction(tx);
+    alert('Trustline added'); await refreshBalances();
+  }catch(e){ alert('Failed: '+e.message); }
+};
+$('#btnSend').onclick=async ()=>{
+  if(!keypair||!account) return alert('Login first');
+  const asset=document.getElementById('sendAsset').value, amount=document.getElementById('sendAmount').value, dest=document.getElementById('sendDest').value;
+  if(!amount||!dest) return alert('Fill all fields');
+  try{
+    const tb=new StellarSdk.TransactionBuilder(account,{fee:StellarSdk.BASE_FEE,networkPassphrase:StellarSdk.Networks.PUBLIC})
+      .addOperation(StellarSdk.Operation.payment({ destination:dest, asset: asset==='XLM'?ASSET_XLM:ASSET_LAAM, amount }))
+      .setTimeout(30).build();
+    tb.sign(keypair); await server.submitTransaction(t b);
+  }catch{}
+};
+document.getElementById('btnSend').onclick=async ()=>{
+  if(!keypair||!account) return alert('Login first');
+  const asset=document.getElementById('sendAsset').value, amount=document.getElementById('sendAmount').value, dest=document.getElementById('sendDest').value;
+  if(!amount||!dest) return alert('Fill all fields');
+  try{
+    const txb=new StellarSdk.TransactionBuilder(account,{fee:StellarSdk.BASE_FEE,networkPassphrase:StellarSdk.Networks.PUBLIC});
+    txb.addOperation(StellarSdk.Operation.payment({
+      destination:dest, asset: asset==='XLM'?ASSET_XLM:ASSET_LAAM, amount
+    }));
+    const tx=txb.setTimeout(30).build(); tx.sign(keypair); await server.submitTransaction(tx);
+    alert('Payment sent'); document.getElementById('sendAmount').value=''; document.getElementById('sendDest').value='';
+    document.getElementById('sendForm').style.display='none'; await refreshBalances();
+  }catch(e){ alert('Send failed: '+e.message); }
+};
+$('#eyeToggle').onclick=()=>{ hideValues=!hideValues; refreshBalances(); };
+document.addEventListener('DOMContentLoaded', async ()=>{
+  if(walletExists()){ document.getElementById('unlockView').classList.remove('hidden'); }
+  await loadOrderbook();
+  // Haddii userku markiiba unlock sameeyo, values way buuxsamayaan
+});
 </script>
 </body>
-  </html>
-  
+            </html>
+            
