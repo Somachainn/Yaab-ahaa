@@ -41,7 +41,7 @@ button:hover{background:var(--brand2)}
   background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:10px 14px; display:flex; align-items:center; gap:10px; font-weight:700
 }
 .portfolio{
-  display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:stretch
+  display:grid; grid-template-columns:1fr; gap:12px; align-items:stretch
 }
 @media (max-width:760px){ .portfolio{grid-template-columns:1fr} }
 .value-xl{font-size:1.6rem; font-weight:900}
@@ -105,7 +105,6 @@ button:hover{background:var(--brand2)}
           <span class="badge">LIVE</span>
         </div>
 
-        
       </div>
     </div>
 
@@ -254,9 +253,9 @@ async function login(secret){
   try{
     keypair = StellarSdk.Keypair.fromSecret(secret);
     account = await server.loadAccount(keypair.publicKey());
-    $('#pubKey').textContent = keypair.publicKey();
+    // Waxaan ka saaray line-kii hore ee ahaa: $('#pubKey').textContent = keypair.publicKey();
     $('#recvPub').textContent = keypair.publicKey();
-    $('#copyPub').onclick = ()=>navigator.clipboard.writeText(keypair.publicKey());
+    // Waxaan ka saaray line-kii hore ee ahaa: $('#copyPub').onclick = ()=>navigator.clipboard.writeText(keypair.publicKey());
     $('#copyRecv').onclick = ()=>navigator.clipboard.writeText(keypair.publicKey());
     showLoggedIn(true);
     startRealtime();
@@ -393,4 +392,5 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 </body>
-</html>
+                                                                          </html>
+                                                                          
