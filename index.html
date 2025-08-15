@@ -105,13 +105,7 @@ button:hover{background:var(--brand2)}
           <span class="badge">LIVE</span>
         </div>
 
-        <div class="pill">
-          <div style="flex:1">
-            <div class="sub">Your Public Key</div>
-            <div id="pubKey" class="mono small">-</div>
-          </div>
-          <button id="copyPub" class="copy">Copy</button>
-        </div>
+        
       </div>
     </div>
 
@@ -211,145 +205,7 @@ function laamMid(){
   if(bid>0 && ask>0) return (bid+ask)/2;
   return ask || bid || 0;
 }
-<!-- Trade -->
-      <div class="card trade-card">
-        <div class="trade-header">
-          <span class="icon">←</span>
-          <h3>Trade</h3>
-          <span class="icon" id="refreshOB">↻</span>
-        </div>
-        <div class="trade-asset-selector">
-          <div class="asset-box">
-            <img src="https://i.ibb.co/r28SP1bN/20250802-225108.png" alt="Laam">
-            <div>
-              <div class="asset-name">Laam</div>
-              <div class="asset-issuer">laam.online</div>
-            </div>
-          </div>
-          <span class="swap-icon" id="swapAssets">⇄</span>
-          <div class="asset-box">
-            <img src="https://res.coinpaper.com/coinpaper/stellar_xlm_logo_07021d63c0.png" alt="XLM">
-            <div>
-              <div class="asset-name">XLM</div>
-              <div class="asset-issuer">stellar.org</div>
-            </div>
-          </div>
-        </div>
-        <div class="trade-tabs">
-          <div class="tab" id="overviewTab">Overview</div>
-          <div class="tab active" id="orderbookTab">Orderbook</div>
-          <div class="tab" id="lastTradesTab">Last Trades</div>
-        </div>
-        <div class="orderbook-content" id="orderbookContent">
-          <table class="orderbook-table">
-            <thead><tr><th>Amount (Laam)</th><th>Price (XLM)</th><th>Total (XLM)</th></tr></thead>
-            <tbody id="asksBody"></tbody>
-          </table>
-          <div class="spread" id="spreadValue">-</div>
-          <table class="orderbook-table">
-            <tbody id="bidsBody"></tbody>
-          </table>
-        </div>
-        <div id="overviewContent" style="display:none; padding:10px 20px 20px;">
-          <div style="font-size:2.5rem; font-weight:bold; text-align:center; margin-bottom:10px;"><span id="overviewLaamPriceXLM">0.00000</span> XLM</div>
-          <div class="muted" style="text-align:center; font-size:.9rem; margin-bottom:20px;">Laam price (sample)</div>
-          <div style="display:flex; justify-content:center; gap:10px; margin-bottom:20px;">
-            <button class="btn-secondary" style="flex:0 1 auto; padding:8px 15px; border-radius:8px;">1D</button>
-            <button class="btn-secondary" style="flex:0 1 auto; padding:8px 15px; border-radius:8px;">1W</button>
-            <button class="btn-secondary" style="flex:0 1 auto; padding:8px 15px; border-radius:8px;">1M</button>
-            <button class="btn-secondary" style="flex:0 1 auto; padding:8px 15px; border-radius:8px;">1Y</button>
-          </div>
-          <div style="width:100%; height:200px; background:#f0f0f0; border-radius:12px; margin-bottom:10px; display:flex; align-items:center; justify-content:center; color:var(--muted);">[Graph Placeholder]</div>
-        </div>
-        <div id="lastTradesContent" style="display:none; padding:10px 20px 20px;">
-          <p class="muted">Recent trades will appear here.</p>
-        </div>
-        <div class="trade-actions">
-          <button class="btn-buy" id="btnBuy">Buy</button>
-          <button class="btn-sell" id="btnSell">Sell</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Trade Modal -->
-  <div id="tradeModal" class="trade-modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 class="modal-title" id="modalTitle">Buy Laam</h3>
-        <button class="modal-close" onclick="closeTradeModal()">&times;</button>
-      </div>
-      <div class="panel">
-        <div class="titleRow">
-          <div class="title" id="panelTitle">Buy Laam</div>
-          <div class="avail">Available: <span id="availBalance">0 XLM</span></div>
-        </div>
-
-        <div class="field">
-          <div class="inputWrap">
-            <input id="modalPrice" type="number" step="0.0000001" placeholder="0.135" />
-            <div class="unit">XLM</div>
-          </div>
-          <div class="hint">Price (XLM per Laam)</div>
-        </div>
-
-        <div class="field">
-          <div class="inputWrap">
-            <input id="modalAmount" type="number" step="0.0000001" placeholder="Amount" />
-            <div class="unit">Laam</div>
-          </div>
-          <div class="rowBtns">
-            <button data-fill="25">25%</button>
-            <button data-fill="50">50%</button>
-            <button data-fill="75">75%</button>
-            <button data-fill="100">100%</button>
-          </div>
-        </div>
-
-        <div class="totalBox">
-          <div class="inputWrap">
-            <input id="modalTotal" type="number" step="0.0000001" placeholder="0.0000000" disabled />
-            <div class="unit">XLM</div>
-          </div>
-          <div class="hint" id="totalHint">Total XLM you'll pay</div>
-        </div>
-
-        <button class="cta buy" id="modalConfirmBtn">Buy Laam</button>
-      </div>
-    </div>
-  </div>
-
-<script>
-/* ====== SETUP ====== */
-const server = new StellarSdk.Server('https://horizon.stellar.org');
-const ISSUER = 'GAL4ECDAXNBMJYFCWIJ32HKVIRLCNEXY664CAZYI3EINQWPLXTMEPR64';
-const LAAM  = new StellarSdk.Asset('Laam', ISSUER);
-const XLM   = StellarSdk.Asset.native();
-const ENCRYPTED_KEY_NAME = 'laam_dex_wallet_v4';
-
-/* ====== STATE ====== */
-let keypair = null, account = null, balTimer = null;
-let asks = [], bids = [];
-let currentTradeType = 'buy';
-
-/* ====== HELPERS ====== */
-function encryptKey(secretKey, password){ return CryptoJS.AES.encrypt(secretKey, password).toString(); }
-function decryptKey(encryptedKey, password){ const bytes = CryptoJS.AES.decrypt(encryptedKey, password); return bytes.toString(CryptoJS.enc.Utf8); }
-function walletExists(){ return !!localStorage.getItem(ENCRYPTED_KEY_NAME); }
-function showView(view){
-  document.getElementById('authSection').style.display = (view==='loggedIn')?'none':'block';
-  document.getElementById('loggedInView').style.display = (view==='loggedIn')?'block':'none';
-  document.getElementById('unlockView').classList.toggle('hidden', view!=='unlock');
-  document.getElementById('initialView').classList.toggle('hidden', view!=='initial');
-}
-function alertTxError(err){
-  const rc = err?.response?.data?.extras?.result_codes;
-  if(rc){
-    alert('Failed: ' + JSON.stringify(rc));
-  }else{
-    alert('Failed: ' + (err.message || err));
-  }
-  }
 /* ==== UI TOGGLES ==== */
 function showLoggedIn(show){
   $('#authCard').style.display = show ? 'none' : 'block';
@@ -530,60 +386,7 @@ $('#sendNow').addEventListener('click', async ()=>{
     await refreshBalancesAndPrices();
   }catch(e){ alert('Send failed: '+(e?.response?.data?.extras?.result_codes?.operations||e.message)) }
 });
-      if(!hasTL){ alert('Add Laam trustline first (click "Add Laam Trustline").'); return; }
 
-      const fee = await server.fetchBaseFee();
-      const tx = new StellarSdk.TransactionBuilder(account, {
-        fee, networkPassphrase: StellarSdk.Networks.PUBLIC
-      })
-      .addOperation(StellarSdk.Operation.manageBuyOffer({
-        selling: XLM,
-        buying: LAAM,
-        buyAmount: amount.toFixed(7),
-        price: price.toString()
-      }))
-      .setTimeout(30)
-      .build();
-      tx.sign(keypair);
-      await server.submitTransaction(tx);
-      alert('Buy order submitted!');
-    }else{
-      const fee = await server.fetchBaseFee();
-      const tx = new StellarSdk.TransactionBuilder(account, {
-        fee, networkPassphrase: StellarSdk.Networks.PUBLIC
-      })
-      .addOperation(StellarSdk.Operation.manageSellOffer({
-        selling: LAAM,
-        buying: XLM,
-        amount: amount.toFixed(7),
-        price: price.toString(),
-        offerId: '0'
-      }))
-      .setTimeout(30)
-      .build();
-      tx.sign(keypair);
-      await server.submitTransaction(tx);
-      alert('Sell order submitted!');
-    }
-    closeTradeModal();
-    await refreshBalances();
-    await loadOrderbook();
-  }catch(e){
-    console.error('Trade failed:', e);
-    alertTxError(e);
-  }
-}
-
-/* ====== TABS ====== */
-function switchTab(name){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(name+'Tab').classList.add('active');
-  document.getElementById('orderbookContent').style.display='none';
-  document.getElementById('overviewContent').style.display='none';
-  document.getElementById('lastTradesContent').style.display='none';
-  document.getElementById(name+'Content').style.display='block';
-  }
-  
 /* ==== INIT ==== */
 document.addEventListener('DOMContentLoaded', ()=>{
   if(walletExists()){ goUnlock() } else { goFirst() }
