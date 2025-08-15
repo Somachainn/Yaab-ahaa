@@ -253,9 +253,7 @@ async function login(secret){
   try{
     keypair = StellarSdk.Keypair.fromSecret(secret);
     account = await server.loadAccount(keypair.publicKey());
-    // Waxaan ka saaray line-kii hore ee ahaa: $('#pubKey').textContent = keypair.publicKey();
     $('#recvPub').textContent = keypair.publicKey();
-    // Waxaan ka saaray line-kii hore ee ahaa: $('#copyPub').onclick = ()=>navigator.clipboard.writeText(keypair.publicKey());
     $('#copyRecv').onclick = ()=>navigator.clipboard.writeText(keypair.publicKey());
     showLoggedIn(true);
     startRealtime();
@@ -264,10 +262,17 @@ async function login(secret){
     if(walletExists()) goUnlock(); else goFirst();
   }
 }
+
 function logout(){
+  // Marka hore qari walletView si uu si degdeg ah u dareemo
+  showLoggedIn(false);
+  
+  // Ka dib jooji hawlaha gadaal ka socda
   stopRealtime();
   keypair=null; account=null;
   $('#unlockPwd').value='';
+  
+  // Ugu dambayn, muuji shaashadda saxda ah (unlock ama import)
   if(walletExists()) goUnlock(); else goFirst();
 }
 $('#btnLock').addEventListener('click', logout);
@@ -392,5 +397,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 </script>
 </body>
-                                                                          </html>
-                                                                          
+</html>
